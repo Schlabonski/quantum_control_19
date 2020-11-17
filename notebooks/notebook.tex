@@ -141,7 +141,7 @@
     \def\gt{>}
     \def\lt{<}
     % Document parameters
-    \title{sheet2\_rabi\_oscillations}
+    \title{sheet12\_quantum\_algorithms\_solution}
     
     
     
@@ -280,129 +280,416 @@
     
 
     
+    \section{Sheet 12 - Numerical Part}\label{sheet-12---numerical-part}
+
+To be handed in until July 17th, 18:00. Please send your solutions to
+pascal.weckesser@physik.uni-freiburg.de.
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{import} \PY{n+nn}{qutip}
-        \PY{k+kn}{import} \PY{n+nn}{scipy}\PY{n+nn}{.}\PY{n+nn}{constants} \PY{k}{as} \PY{n+nn}{csts}
-        \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
-        
-        \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
-        
-        \PY{n}{hbar} \PY{o}{=} \PY{n}{csts}\PY{o}{.}\PY{n}{hbar}
-        \PY{n}{pi} \PY{o}{=} \PY{n}{csts}\PY{o}{.}\PY{n}{pi}
-        
-        \PY{o}{\PYZpc{}}\PY{k}{matplotlib} notebook
+{\color{incolor}In [{\color{incolor}409}]:} \PY{o}{\PYZpc{}}\PY{k}{matplotlib} notebook
+          \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
+          \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
+          
+          \PY{k+kn}{import} \PY{n+nn}{qutip} \PY{k}{as} \PY{n+nn}{q}
+          \PY{n}{pi} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{pi}
+          
+          \PY{k+kn}{from} \PY{n+nn}{IPython}\PY{n+nn}{.}\PY{n+nn}{core}\PY{n+nn}{.}\PY{n+nn}{display} \PY{k}{import} \PY{n}{SVG} 
 \end{Verbatim}
 
 
-    \[\newcommand{\bra}[1]{\left\langle{#1}\right|}
-\newcommand{\ket}[1]{\left|{#1}\right\rangle}
-\newcommand{\braket}[2]{\left\langle{#1}\middle|{#2}\right\rangle}\]
-\#\# The Quobj class Quantum objects such as kets, bras or operators are
-represented in qutip by the \texttt{quobj} class. Many important QM
-objects are already implemented (basis vectors, Pauli matrices, ladder
-operators, ...). To get started, implement the following quantum objects
-in qutip. (Use tab-completion to get an overview of built-in types and
-allowed methods.)
+    \[\newcommand{\bra}[1]{\left\langle\,{#1}\,\right|}
+\newcommand{\ket}[1]{\left|\,{#1}\,\right\rangle}
+\newcommand{\braket}[2]{\left\langle{#1}\middle|{#2}\right\rangle}\] \#
+Spin Flip Correction
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi})}
-\tightlist
-\item
-  Create the basis vectors \(\ket{g} = (0, 1)^T\) and
-  \(\ket{e} = (1, 0)^T\).
-\end{enumerate}
+    \texttt{qutip} has the ability to compute the effect of multi-qubit
+gates of general input states and give a latex representation of the
+algorithm. This can look like this:
 
-    \begin{enumerate}
-\def\labelenumi{\arabic{enumi})}
-\setcounter{enumi}{1}
-\tightlist
-\item
-  Calculate the inner products \(\bra{e}e\rangle\) and
-  \(\bra{e}g\rangle\).
-\end{enumerate}
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}410}]:} \PY{n}{qc} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{QubitCircuit}\PY{p}{(}\PY{n}{N}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{)}
+          
+          \PY{c+c1}{\PYZsh{} input states defined here are only used for plotting!}
+          \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}state}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{0}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+          \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}state}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+          
+          \PY{c+c1}{\PYZsh{} add a Hadamard / SNOT gate for qubit 0. Pay attention, the counting starts from the}
+          \PY{c+c1}{\PYZsh{} most significant (= first in terms of binary represenation) bit.}
+          \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}gate}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{SNOT}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{controls}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,} \PY{n}{targets}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+          
+          \PY{c+c1}{\PYZsh{} entangle the two qubits}
+          \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}gate}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{CNOT}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{controls}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{targets}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
+          
+          \PY{c+c1}{\PYZsh{} this allows us to create a neat representation of the algorithm}
+          \PY{n}{qc}\PY{o}{.}\PY{n}{png}
+\end{Verbatim}
 
-    \begin{enumerate}
-\def\labelenumi{\arabic{enumi})}
-\setcounter{enumi}{2}
-\tightlist
-\item
-  Create the operator \(\sigma_- = \ket{g}\bra{e}\). How does it act on
-  \(\ket{g}\) and \(\ket{e}\).
-\end{enumerate}
+\texttt{\color{outcolor}Out[{\color{outcolor}410}]:}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_4_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
 
-    \begin{enumerate}
-\def\labelenumi{\arabic{enumi})}
-\setcounter{enumi}{3}
-\tightlist
-\item
-  Verify the property of the Pauli matrices
-  \[\sigma_x^2 = \sigma_y^2 = \sigma_z^2 = -i\sigma_x \sigma_y \sigma_z = \begin{pmatrix} 1&0\\0&1\end{pmatrix} = I\]
-\end{enumerate}
+    \emph{Remark:} \texttt{qc.png} is possibly not working due to
+\href{https://bugs.launchpad.net/ubuntu/+source/imagemagick/+bug/1796563}{this
+bug}. However a \texttt{.pdf} should be created if you have latex
+installed.
 
-    \section{Rabi Oscillations}\label{rabi-oscillations}
+    The effect of the gate on a state can be computed as in the following
+example:
 
-In the last lecture you have derived the Hamiltonian for a two level
-system that is driven by a classical electromagnetic wave. Including
-detuning, the Hamiltonian for this system is
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}411}]:} \PY{c+c1}{\PYZsh{} sorry for the redundance here}
+          \PY{k}{def} \PY{n+nf}{five\PYZus{}bit\PYZus{}basis\PYZus{}representation}\PY{p}{(}\PY{n}{ket}\PY{p}{)}\PY{p}{:}
+              \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{n}{s} \PY{o+ow}{in} \PY{n+nb}{enumerate}\PY{p}{(}\PY{n}{ket}\PY{p}{)}\PY{p}{:}
+                  \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+si}{\PYZob{}0:05b\PYZcb{}}\PY{l+s+s1}{\PYZgt{} : }\PY{l+s+si}{\PYZob{}1:.3f\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{s}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+                  
+          \PY{k}{def} \PY{n+nf}{three\PYZus{}bit\PYZus{}basis\PYZus{}representation}\PY{p}{(}\PY{n}{ket}\PY{p}{)}\PY{p}{:}
+              \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{n}{s} \PY{o+ow}{in} \PY{n+nb}{enumerate}\PY{p}{(}\PY{n}{ket}\PY{p}{)}\PY{p}{:}
+                  \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+si}{\PYZob{}0:03b\PYZcb{}}\PY{l+s+s1}{\PYZgt{} : }\PY{l+s+si}{\PYZob{}1:.3f\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{s}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+                  
+          \PY{k}{def} \PY{n+nf}{two\PYZus{}bit\PYZus{}basis\PYZus{}representation}\PY{p}{(}\PY{n}{ket}\PY{p}{)}\PY{p}{:}
+              \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{n}{s} \PY{o+ow}{in} \PY{n+nb}{enumerate}\PY{p}{(}\PY{n}{ket}\PY{p}{)}\PY{p}{:}
+                  \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{|}\PY{l+s+si}{\PYZob{}0:02b\PYZcb{}}\PY{l+s+s1}{\PYZgt{} : }\PY{l+s+si}{\PYZob{}1:.3f\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{s}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
 
-\[ H_{semiclassical} = \frac{\hbar}{2} \left(\begin{array}{cc} -2\delta & \Omega \\ \Omega & 0 \end{array}\right),\]
 
-given in the eigenstate basis of the unperturbed atom
-\(\ket{g} = (0, 1)^T\) and \(\ket{e} = (1, 0)^T\). Here
-\(\delta = \omega_L - \omega_0\) is the detuning of the driving field
-with respect to the atomic transition and \(\Omega\) is the on-resonance
-Rabi frequency.
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}412}]:} \PY{c+c1}{\PYZsh{} create a matrix that represents the total effect of the operation}
+          \PY{n}{gate\PYZus{}operation} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{gate\PYZus{}sequence\PYZus{}product}\PY{p}{(}\PY{n}{qc}\PY{o}{.}\PY{n}{propagators}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+          
+          \PY{c+c1}{\PYZsh{} let it act on the state |01\PYZgt{}}
+          \PY{n}{psi} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{ket}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{01}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{psi\PYZus{}f} \PY{o}{=} \PY{n}{gate\PYZus{}operation} \PY{o}{*} \PY{n}{psi}
+          
+          \PY{c+c1}{\PYZsh{} investigate the gate action in the \PYZdq{}bit string ordered\PYZdq{} basis, we see}
+          \PY{c+c1}{\PYZsh{} that we created the fully entangled state |+\PYZgt{}}
+          \PY{n}{two\PYZus{}bit\PYZus{}basis\PYZus{}representation}\PY{p}{(}\PY{n}{psi\PYZus{}f}\PY{p}{)}
+\end{Verbatim}
 
-In this tutorial we will numerically simulate the time evolution of this
-system, using the QUantum Toolbox In Python (\texttt{qutip}).
 
-    \subsection{Time evolution}\label{time-evolution}
+    \begin{Verbatim}[commandchars=\\\{\}]
+|00> : 0.000+0.000j
+|01> : 0.707+0.000j
+|10> : 0.707+0.000j
+|11> : 0.000+0.000j
 
-In \texttt{qutip} the unitary time evolution of an initial state
-\texttt{psi0} under a Hamiltonian \texttt{H} can be computed by
+    \end{Verbatim}
 
-\begin{verbatim}
-    qutip.mesolve(H, psi0, timesteps, c_ops, e_ops)
-\end{verbatim}
+    In the lecture you have learned about a simple quantum error correction
+scheme. It consists of a signal qubit (0) that should be uncorrupted and
+two \emph{ancilla} qubits (1,2). By measuring the qubits 1 and 2 one can
+determine, whether there has been a spin flip (\(\pi\)-rotation around
+\(x\)) on any of the three qubits, without collapsing qubit 0. Therefore
+one can correct the system for possible changes by applying a followup
+gate.
 
-where \texttt{timesteps} is an array of times for which the state of the
-system should be returned, \texttt{c\_ops} is a list of collapse
-operators that describe coupling to the surroundings (i.e. an empty list
-for unitary time evolution) and \texttt{e\_ops} is a list that can
-contain operators for which the expectation value at each timestep
-should be stored as well.
+\textbf{a)} \emph{(5 Points)} Implement the error correction scheme as a
+\texttt{QubitCircuit} and verify the three predicted outcomes, depending
+on which qubit undergoes a spin-flip, as well as that the quantum
+information of the signal qubit is conserved. Visualize the gate
+sequence (no penalty if it doesn't work due to software bugs).
 
-\subsubsection{Exercise 1}\label{exercise-1}
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}413}]:} \PY{n}{errors} \PY{o}{=} \PY{p}{[}\PY{k+kc}{None}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{RX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{RY}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{RZ}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{error\PYZus{}targets} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{]}
+          
+          \PY{n}{one} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{basis}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
+          \PY{n}{zero} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{basis}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{)}
+          \PY{n}{psi} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{Qobj}\PY{p}{(}\PY{p}{[}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}\PY{p}{)}\PY{o}{/}\PY{n}{np}\PY{o}{.}\PY{n}{sqrt}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{)}
+          
+          \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n}{error\PYZus{}targets}\PY{p}{:}
+              \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Spin flip occurring on }\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{i}\PY{p}{)}\PY{p}{)}
+              \PY{n}{qc} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{QubitCircuit}\PY{p}{(}\PY{n}{N}\PY{o}{=}\PY{l+m+mi}{3}\PY{p}{)}
+              
+              \PY{c+c1}{\PYZsh{} this  is for plotting only}
+              \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}state}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}}\PY{l+s+s1}{Psi}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{state\PYZus{}type}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{input}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+              \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}state}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{0}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{state\PYZus{}type}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{input}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+              \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}state}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{0}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{n}{state\PYZus{}type}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{input}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+              
+              \PY{c+c1}{\PYZsh{} initial entangled state preparation}
+              \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}gate}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{RX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{controls}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,} \PY{n}{targets}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{arg\PYZus{}value}\PY{o}{=}\PY{n}{pi}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{)}
+              
+              \PY{c+c1}{\PYZsh{} entangling psi with the two ancillae}
+              \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}gate}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{CNOT}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{controls}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,}\PY{n}{targets}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
+              \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}gate}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{CNOT}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{controls}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,}\PY{n}{targets}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{)}
+              
+              \PY{c+c1}{\PYZsh{} apply spin flip to one of the qubits}
+              \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}gate}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{RX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{controls}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,} \PY{n}{targets}\PY{o}{=}\PY{n}{i}\PY{p}{,} \PY{n}{arg\PYZus{}value}\PY{o}{=}\PY{n}{pi}\PY{p}{)}
+             
+              \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}gate}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{CNOT}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{controls}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{targets}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{)}
+              \PY{n}{qc}\PY{o}{.}\PY{n}{add\PYZus{}gate}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{CNOT}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{controls}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{targets}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
+              
+              \PY{c+c1}{\PYZsh{} propagate a given input state through the error correction gate}
+              \PY{n}{inputstate} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{ket}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{100}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+              \PY{n}{operation} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{gate\PYZus{}sequence\PYZus{}product}\PY{p}{(}\PY{n}{qc}\PY{o}{.}\PY{n}{propagators}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+              
+              \PY{n}{finalstate} \PY{o}{=} \PY{n}{operation}\PY{o}{*}\PY{n}{inputstate}
+              
+              \PY{c+c1}{\PYZsh{}print(operation)}
+              \PY{c+c1}{\PYZsh{}print(inputstate)}
+              \PY{n}{three\PYZus{}bit\PYZus{}basis\PYZus{}representation}\PY{p}{(}\PY{n}{finalstate}\PY{p}{)}
+              \PY{n}{qc}\PY{o}{.}\PY{n}{png}
+              \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
 
-\begin{enumerate}
-\def\labelenumi{\alph{enumi})}
-\tightlist
-\item
-  Simulate the time evolution \(\ket{\Psi(t)}\) of an initial state
-  \(\ket{g}\) driven by a field with Rabi frequency \(\Omega= 100kHz\)
-  and detuning \(\delta=0\) for two full Rabi cycles. Plot the
-  probability of finding the system in the excited state
-  \(\left|\braket{e}{\Psi(t)}\right|^2\) as a function of time. (You can
-  set \(\hbar=1\).)
-\end{enumerate}
 
-    \begin{enumerate}
-\def\labelenumi{\alph{enumi})}
-\setcounter{enumi}{1}
-\tightlist
-\item
-  As in a) but now for different nonzero detunings of \(\delta=\Omega\)
-  and \(\delta=2.5 \Omega\).
-\end{enumerate}
+    \begin{Verbatim}[commandchars=\\\{\}]
+Spin flip occurring on 0
+|000> : 0.000+0.000j
+|001> : 0.000+0.000j
+|010> : 0.000+0.000j
+|011> : 0.000-0.707j
+|100> : 0.000+0.000j
+|101> : 0.000+0.000j
+|110> : 0.000+0.000j
+|111> : -0.707+0.000j
 
-    \begin{enumerate}
-\def\labelenumi{\alph{enumi})}
-\setcounter{enumi}{2}
-\tightlist
-\item
-  \textbf{BONUS}: Visualize the time evolutions obtained in a) and b) on
-  the Bloch sphere, using \texttt{qutip.Bloch()}.
-\end{enumerate}
+
+Spin flip occurring on 1
+|000> : 0.000+0.000j
+|001> : 0.000+0.000j
+|010> : -0.707+0.000j
+|011> : 0.000+0.000j
+|100> : 0.000+0.000j
+|101> : 0.000+0.000j
+|110> : 0.000-0.707j
+|111> : 0.000+0.000j
+
+
+Spin flip occurring on 2
+|000> : 0.000+0.000j
+|001> : -0.707+0.000j
+|010> : 0.000+0.000j
+|011> : 0.000+0.000j
+|100> : 0.000+0.000j
+|101> : 0.000-0.707j
+|110> : 0.000+0.000j
+|111> : 0.000+0.000j
+
+
+
+    \end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}414}]:} \PY{n}{qc}\PY{o}{.}\PY{n}{png}
+\end{Verbatim}
+
+\texttt{\color{outcolor}Out[{\color{outcolor}414}]:}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_11_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+
+    \section{Deutsch-Josza Algorithm}\label{deutsch-josza-algorithm}
+
+    The Deutsch-Josza algorithm is an example for a (somewhat constructed)
+problem in which a quantum computer outperforms a classical computer.
+The problem is stated as follows: consider a Boolean function
+
+\begin{align*}
+f(\lbrace 0, 1 \rbrace^n) \longrightarrow \lbrace 0, 1 \rbrace
+\end{align*}
+
+mapping \(n\) (qu)bits of input to a single (qu)bit of output. We are
+promised that the function \(f(x)\) is either a constant or a balanced
+{[}1{]} function and want to find out which of both possibilities is
+realized. Classically, to determine the nature of the function, we would
+need to check more than half of the possible inputs, i.e.
+\((2^n +1)/2\), to be sure. Using the Deutsch-Josza algorithm, the
+computational effort consists of only a single evaluation of \(f(x)\)
+and the measurement of \(n-1\) qubits, thus scaling linearly instead of
+exponentially with \(n\).
+
+{[}1{]} A balanced function maps the input to an output of 50\% each
+\(0\) and \(1\).
+
+    The implementation of the Deutsch-Josza algorithm is shown below. \(n\)
+input qubits are initialized in the \(\ket{0}\) state, one target qubit
+is initialized in the state \(\ket{1}\). The data qubits then subject to
+a Hadamard transform \(H_n = H \otimes ... \otimes H\), the same is done
+for the target qubit. The circuits kernel \(U_f\) ouputs the unvaried
+data qubits and subjects \(\ket{y}\) to the operation
+\(\ket{y \oplus f(x)}\). You might remember from the last paper that
+\(\oplus\) equals a controled-NOT operation, here \(\ket{f(x)}\) is the
+control and \(\ket{y}\) is the target qubit. After the kernel, the data
+qubits again undergo a Hadamard transform and are then measured.
+
+The nature of \(f(x)\) is determined in the following way: if the
+function is constant, the measurement outcome will be \(\ket{0}^n\) with
+probability \(1\), if it is balanced there will be \(0\) probability of
+measuring the final state \(\ket{0}^n\)
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}415}]:} \PY{n}{SVG}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{qc\PYZus{}intro\PYZus{}deutsch\PYZus{}josza.svg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+
+\texttt{\color{outcolor}Out[{\color{outcolor}415}]:}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_15_0.pdf}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}416}]:} \PY{n}{SVG}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{qc\PYZus{}intro\PYZus{}deutsch\PYZus{}josza1.svg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+
+\texttt{\color{outcolor}Out[{\color{outcolor}416}]:}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_16_0.pdf}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+
+    \textbf{a)} \emph{(5 Points)} Below, you are given two examplary circuit
+kernel for a constant/balanced \(f(x)\). Implement the Deutsch-Josza
+algorithm on five qubits and verify the described outcome for both
+kernels.
+
+\emph{Implementation:} I recommend you to multiply single gate
+operations from \texttt{qutip.gates} to your initial state vector
+\texttt{qutip.ket(\textquotesingle{}10000\textquotesingle{})}. The
+Hadamard gate is implemented in \texttt{qutip.gates.snot(N,\ target)},
+the Hadamard transform is \texttt{qutip.hadamard\_transform(N)}.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}417}]:} \PY{k}{def} \PY{n+nf}{unary\PYZus{}constant}\PY{p}{(}\PY{n}{ket\PYZus{}input}\PY{p}{,} \PY{n}{N}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{:}
+              \PY{c+c1}{\PYZsh{} in the constant case we can choose f(x) = 0 or 1}
+              \PY{n}{fx} \PY{o}{=} \PY{l+m+mi}{1}
+              
+              \PY{c+c1}{\PYZsh{} for 1 the operation |y + f(x)\PYZgt{} is equivalent to a NOT operation}
+              \PY{c+c1}{\PYZsh{} for 0, the operation is equal to unity}
+              \PY{k}{if} \PY{n}{fx} \PY{o}{==} \PY{l+m+mi}{1}\PY{p}{:}
+                  \PY{n}{gate} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{gates}\PY{o}{.}\PY{n}{sqrtnot}\PY{p}{(}\PY{n}{N}\PY{o}{=}\PY{n}{N}\PY{p}{,} \PY{n}{target}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2}
+              \PY{k}{elif} \PY{n}{fx} \PY{o}{==}\PY{l+m+mi}{0}\PY{p}{:}
+                  \PY{n}{gate} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{tensor}\PY{p}{(}\PY{p}{[}\PY{n}{q}\PY{o}{.}\PY{n}{qeye}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{]}\PY{o}{*}\PY{n}{N}\PY{p}{)}
+              
+              \PY{n}{ket\PYZus{}output} \PY{o}{=} \PY{n}{gate} \PY{o}{*} \PY{n}{ket\PYZus{}input}
+              
+              \PY{k}{return} \PY{n}{ket\PYZus{}output}
+          
+          \PY{k}{def} \PY{n+nf}{unary\PYZus{}balanced}\PY{p}{(}\PY{n}{ket\PYZus{}input}\PY{p}{,} \PY{n}{N}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{:}
+              \PY{c+c1}{\PYZsh{} as an exemplary unary balanced function we use one, whose}
+              \PY{c+c1}{\PYZsh{} output is 0 for bit N == 0 and 1 for bit N == 1}
+              \PY{c+c1}{\PYZsh{} this means, the operation is a CNOT with control N and target 0}
+              \PY{n}{cnot} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{gates}\PY{o}{.}\PY{n}{cnot}\PY{p}{(}\PY{n}{N}\PY{o}{=}\PY{n}{N}\PY{p}{,} \PY{n}{control}\PY{o}{=}\PY{n}{N}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{target}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+              \PY{n}{ket\PYZus{}output} \PY{o}{=} \PY{n}{cnot} \PY{o}{*} \PY{n}{ket\PYZus{}input}
+              
+              \PY{k}{return} \PY{n}{ket\PYZus{}output}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}418}]:} \PY{c+c1}{\PYZsh{} the deutsch josza algorithm for N qubits, qubit 0 is the target, most significant bit first!}
+          \PY{n}{N} \PY{o}{=} \PY{l+m+mi}{5}
+          \PY{n}{psi\PYZus{}init} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{ket}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{1}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{0}\PY{l+s+s1}{\PYZsq{}}\PY{o}{*}\PY{p}{(}\PY{n}{N}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}
+          
+          \PY{n}{psiH} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{tensor}\PY{p}{(}\PY{n}{q}\PY{o}{.}\PY{n}{snot}\PY{p}{(}\PY{n}{N}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{target}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{q}\PY{o}{.}\PY{n}{hadamard\PYZus{}transform}\PY{p}{(}\PY{n}{N}\PY{o}{=}\PY{n}{N}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}\PY{o}{*} \PY{n}{psi\PYZus{}init}
+          
+          \PY{n}{psiU} \PY{o}{=} \PY{n}{unary\PYZus{}constant}\PY{p}{(}\PY{n}{psiH}\PY{p}{,} \PY{n}{N}\PY{o}{=}\PY{n}{N}\PY{p}{)}
+          
+          \PY{n}{psif} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{tensor}\PY{p}{(}\PY{n}{q}\PY{o}{.}\PY{n}{qeye}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{,} \PY{n}{q}\PY{o}{.}\PY{n}{hadamard\PYZus{}transform}\PY{p}{(}\PY{n}{N}\PY{o}{=}\PY{n}{N}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)} \PY{o}{*} \PY{n}{psiU}
+          
+          \PY{n}{five\PYZus{}bit\PYZus{}basis\PYZus{}representation}\PY{p}{(}\PY{n}{psif}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+|00000> : -0.707+0.000j
+|00001> : 0.000+0.000j
+|00010> : 0.000+0.000j
+|00011> : 0.000+0.000j
+|00100> : 0.000+0.000j
+|00101> : 0.000+0.000j
+|00110> : 0.000+0.000j
+|00111> : 0.000+0.000j
+|01000> : 0.000+0.000j
+|01001> : 0.000+0.000j
+|01010> : 0.000+0.000j
+|01011> : 0.000+0.000j
+|01100> : 0.000+0.000j
+|01101> : 0.000+0.000j
+|01110> : 0.000+0.000j
+|01111> : 0.000+0.000j
+|10000> : 0.707+0.000j
+|10001> : 0.000+0.000j
+|10010> : 0.000+0.000j
+|10011> : 0.000+0.000j
+|10100> : 0.000+0.000j
+|10101> : 0.000+0.000j
+|10110> : 0.000+0.000j
+|10111> : 0.000+0.000j
+|11000> : 0.000+0.000j
+|11001> : 0.000+0.000j
+|11010> : 0.000+0.000j
+|11011> : 0.000+0.000j
+|11100> : 0.000+0.000j
+|11101> : 0.000+0.000j
+|11110> : 0.000+0.000j
+|11111> : 0.000+0.000j
+
+    \end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}419}]:} \PY{c+c1}{\PYZsh{} the deutsch josza algorithm for N qubits, qubit 0 is the target, most significant bit first!}
+          \PY{n}{N} \PY{o}{=} \PY{l+m+mi}{5}
+          \PY{n}{psi\PYZus{}init} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{ket}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{1}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{0}\PY{l+s+s1}{\PYZsq{}}\PY{o}{*}\PY{p}{(}\PY{n}{N}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}
+          
+          \PY{n}{psiH} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{tensor}\PY{p}{(}\PY{n}{q}\PY{o}{.}\PY{n}{snot}\PY{p}{(}\PY{n}{N}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{target}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{q}\PY{o}{.}\PY{n}{hadamard\PYZus{}transform}\PY{p}{(}\PY{n}{N}\PY{o}{=}\PY{n}{N}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}\PY{o}{*} \PY{n}{psi\PYZus{}init}
+          
+          \PY{n}{psiU} \PY{o}{=} \PY{n}{unary\PYZus{}balanced}\PY{p}{(}\PY{n}{psiH}\PY{p}{,} \PY{n}{N}\PY{o}{=}\PY{n}{N}\PY{p}{)}
+          
+          \PY{n}{psif} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{tensor}\PY{p}{(}\PY{n}{q}\PY{o}{.}\PY{n}{qeye}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{,} \PY{n}{q}\PY{o}{.}\PY{n}{hadamard\PYZus{}transform}\PY{p}{(}\PY{n}{N}\PY{o}{=}\PY{n}{N}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)} \PY{o}{*} \PY{n}{psiU}
+          
+          \PY{n}{five\PYZus{}bit\PYZus{}basis\PYZus{}representation}\PY{p}{(}\PY{n}{psif}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+|00000> : 0.000+0.000j
+|00001> : 0.707+0.000j
+|00010> : 0.000+0.000j
+|00011> : 0.000+0.000j
+|00100> : 0.000+0.000j
+|00101> : 0.000+0.000j
+|00110> : 0.000+0.000j
+|00111> : 0.000+0.000j
+|01000> : 0.000+0.000j
+|01001> : 0.000+0.000j
+|01010> : 0.000+0.000j
+|01011> : 0.000+0.000j
+|01100> : 0.000+0.000j
+|01101> : 0.000+0.000j
+|01110> : 0.000+0.000j
+|01111> : 0.000+0.000j
+|10000> : 0.000+0.000j
+|10001> : -0.707+0.000j
+|10010> : 0.000+0.000j
+|10011> : 0.000+0.000j
+|10100> : 0.000+0.000j
+|10101> : 0.000+0.000j
+|10110> : 0.000+0.000j
+|10111> : 0.000+0.000j
+|11000> : 0.000+0.000j
+|11001> : 0.000+0.000j
+|11010> : 0.000+0.000j
+|11011> : 0.000+0.000j
+|11100> : 0.000+0.000j
+|11101> : 0.000+0.000j
+|11110> : 0.000+0.000j
+|11111> : 0.000+0.000j
+
+    \end{Verbatim}
+
+    \textbf{b)} \emph{(2 Points)} Describe where the speedup of the
+Deutsch-Josza algorithm originates.
 
 
     % Add a bibliography block to the postdoc
